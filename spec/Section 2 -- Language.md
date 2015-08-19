@@ -581,6 +581,7 @@ Value[Const] :
   - FloatValue
   - StringValue
   - BooleanValue
+  - NullValue
   - EnumValue
   - ListValue[?Const]
   - ObjectValue[?Const]
@@ -650,6 +651,31 @@ Strings are lists of characters wrapped in double-quotes `"`. (ex.
 `"Hello World"`). White space and other otherwise-ignored characters are
 significant within a string value.
 
+#### Null Value
+
+NullValue: `null`
+
+Null values are represented as the keyword `null`.
+
+GraphQL has two similar but not-identical ways to represent the lack of a value,
+by explicitly providing the `null` value, or by implicitly not providing a value
+at all.
+
+For example, these two field calls are similar, but not identical:
+
+```graphql
+{
+  field(arg: null)
+  field
+}
+```
+
+The first has explictly provided `null` to the argument "arg", while the second
+has implicitly not provided a value to the argument "arg". A GraphQL service may
+interpret the two forms differently, if it is advantageous. For example, to
+represent deleting a field vs not altering a field during a
+mutation, respectively.
+
 #### Enum Value
 
 EnumValue : Name but not `true`, `false` or `null`
@@ -658,9 +684,6 @@ Enum values are represented as unquoted names (ex. `MOBILE_WEB`). It is
 recommended that Enum values be "all caps". Enum values are only used in
 contexts where the precise enumeration type is known. Therefore it's not
 necessary to supply an enumeration type name in the literal.
-
-An enum value cannot be "null" in order to avoid confusion. GraphQL
-does not supply a value literal to represent the concept {null}.
 
 #### List Value
 

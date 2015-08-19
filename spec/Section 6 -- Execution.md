@@ -137,20 +137,23 @@ GetFieldEntry(objectType, object, fields):
     {GetFieldTypeFromObjectType(objectType, firstField)}.
   * If {fieldType} is {null}, return {null}, indicating that no entry exists in
     the result map.
-  * Let {resolvedObject} be {ResolveFieldOnObject(objectType, object, fieldEntry)}.
+  * Let {resolvedObject} be {ResolveFieldOnObject(objectType, object, firstField)}.
   * If {resolvedObject} is {null}, return {tuple(responseKey, null)},
     indicating that an entry exists in the result map whose value is `null`.
   * Let {subSelectionSet} be the result of calling {MergeSelectionSets(fields)}.
   * Let {responseValue} be the result of calling {CompleteValue(fieldType, resolvedObject, subSelectionSet)}.
   * Return {tuple(responseKey, responseValue)}.
 
-GetFieldTypeFromObjectType(objectType, firstField):
-  * Call the method provided by the type system for determining the field type
-    on a given object type.
+GetFieldTypeFromObjectType(objectType, field):
+  * Let {fieldName} be the name of {field}.
+  * Return the field type defined by {objectType} with the name {fieldName}.
 
-ResolveFieldOnObject(objectType, object, firstField):
-  * Call the method provided by the type system for determining the resolution
-    of a field on a given object.
+ResolveFieldOnObject(objectType, object, field):
+  * Let {fieldName} be the name of {field}.
+  * Let {arguments} be the result of {ResolveArguments(objectType, field)}
+  * Call the internal function provided by {objectType} for determining the
+    resolved value of a field named {fieldName} on a given {object}
+    provided {arguments}.
 
 MergeSelectionSets(fields):
   * Let {selectionSet} be an empty list.
@@ -188,6 +191,36 @@ ResolveAbstractType(abstractType, objectValue):
   * Return the result of calling the internal method provided by the type
     system for determining the Object type of {abstractType} given the
     value {objectValue}.
+
+### Field Arguments
+
+Fields may include arguments which are provided to the underlying runtime in
+order to correctly produce a value. These arguments are defined by the field in
+the type system to have a specific input type: Scalars, Enum, Input Object, or
+List or Non-Null wrapped of these three.
+
+At each argument position in a query may be a literal value or a variable to be
+provided at runtime.
+
+ResolveArguments(objectType, field)
+  * Let {fieldName} be the name of {field}.
+  * Let {argTypes} be the arguments provided by {objectType} for the field
+    named {fieldName}.
+  * Let {argValues} be an empty Map.
+  * For each {argTypes} as {argName} and {argType}:
+    * Let {arg} be the argument in {field} named {argName}.
+    * If {arg} exists:
+      * Let {value} be the value defined by {arg}.
+      * If {value} is a Variable:
+        * If a value was provided for the variable {value}:
+          * Add an entry to {argValues} named {argName} with the runtime value
+            of the Variable {value}.
+      * Else:
+        * Let {coercedValue} be the result of coercing {value} according to the
+          input coercion rules of {argType}.
+        * Add an entry to {argValues} named {argName} with the
+          value {coercedValue}.
+  * Return {argValues}.
 
 ### Normal evaluation
 

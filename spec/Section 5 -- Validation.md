@@ -518,11 +518,15 @@ fragment stringIntoInt on Arguments {
       * Let {argumentName} be the name of {definition}
       * Let {argument} be the argument in {arguments} named {argumentName}
       * {argument} must exist.
+      * Let {value} be the value of {argument}
+      * {value} must not be the `null` literal.
 
 ** Explanatory Text **
 
 Arguments can be required. Arguments are required if the type of the argument
-is non-null. If it is not non-null, the argument is optional.
+is non-null. If it is not non-null, the argument is optional. When an argument
+type is non-null, and is required, the explicit value `null` may also not
+be provided.
 
 For example the following are valid:
 
@@ -551,6 +555,14 @@ but this is not valid on a non-null argument.
 ```!graphql
 fragment missingRequiredArg on Arguments {
   notNullBooleanArgField
+}
+```
+
+Providing the explicit value `null` is also not valid.
+
+```!graphql
+fragment missingRequiredArg on Arguments {
+  notNullBooleanArgField(nonNullBooleanArg: null)
 }
 ```
 
